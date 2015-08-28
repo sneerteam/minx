@@ -1,5 +1,7 @@
 (ns minx.udp
-  (:require [clojure.core.async :as async :refer [>! <! >!! <!!]])
+  (:require
+    [clojure.core.async :as async :refer [>! <! >!! <!!]]
+    [minx.serialization :refer [serialize deserialize]])
   (:import [java.net DatagramPacket DatagramSocket]))
 
 (def MTU 1400)  ; Anecdotal suggestions on the web.
@@ -19,7 +21,7 @@
   "Reads the encoded datagram and returns [socket-address value]"
   [^DatagramPacket datagram]
   (let [address (.getSocketAddress datagram)
-        value (String. (.getData datagram) 0 (.getLength datagram))]
+        value (deserialize (.getData datagram) (.getLength datagram))]
     #_(println address value)
     [address value]))
 
@@ -28,7 +30,7 @@
   [[address value]]
   (doto (^DatagramPacket new-datagram)
     (.setSocketAddress address)
-    (.setData (.getBytes value))))
+    (.setData (serialize value))))
 
 (defn- send-value [socket value]
   (.send ^DatagramSocket socket (->datagram value)))
@@ -74,7 +76,7 @@
               (reset! socket-atom (open-socket port))
               (catch Exception e (on-open-error e)))
             (recur))))))) ; Make sure closed? has not been set to true.
-  
+
 (defn- close-on-err [port socket socket-operation]
   (try
     (socket-operation socket)
