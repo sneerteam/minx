@@ -20,7 +20,7 @@
   [^DatagramPacket datagram]
   (let [address (.getSocketAddress datagram)
         value (String. (.getData datagram) 0 (.getLength datagram))]
-    (println address value)
+    #_(println address value)
     [address value]))
 
 (defn- ->datagram
