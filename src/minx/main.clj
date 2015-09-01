@@ -13,12 +13,12 @@
 (defn start-server! []
   (let [in (chan)
         out (chan)]
-    (minx.udp/open! in out 2049)
+    (minx.udp/open! in out 2152)
     (thread
       (loop [addresses #{}]
         (when-let [[address _] (<!! in)]
           (>!! out [address addresses])
-          (println "recebido" address)
+          (println "received from" (.getHostString address))
           (recur (conj addresses {:ip (.getHostString address)
                                   :port (.getPort address)})))))
     out))
@@ -27,13 +27,13 @@
 (defn start-client! [host-name]
   (let [in (chan)
         out (chan)
-        server-address (InetSocketAddress. ^String host-name 2049)]
+        server-address (InetSocketAddress. ^String host-name 2152)]
     (minx.udp/open! in out)
     (thread
       (while-let [[address value] (<!! in)]
-        (println "recebido" address)
+        (println "received from" (.getHostString address))
         (doseq [peer value]
-          (>!! out [peer #{}]))))
+          (>!! out [(InetSocketAddress. (peer :ip) (peer :port)) #{}]))))
     (thread
       (while (>!! out [server-address nil])
         (Thread/sleep 4000)))
@@ -43,5 +43,6 @@
 (comment
   (def srv (start-server!))
   (clojure.core.async/close! srv)
-  (def client (minx.main/start-client! "127.0.0.1")))
+  (def client (minx.main/start-client! "127.0.0.1"))
+  (clojure.core.async/close! client))
 
