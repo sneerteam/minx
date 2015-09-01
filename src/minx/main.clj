@@ -7,32 +7,41 @@
 ; ctrl+0: slurp right
 ; ctrl+9: slurp left
 ; alt+0: barf right
-; alt+9: farf left
+; alt+9: barf left
 
 
 (defn start-server! []
   (let [in (chan)
         out (chan)]
-    (minx.udp/open! in out 2048)
+    (minx.udp/open! in out 2049)
     (thread
-      (while-let [[address value] (<!! in)]
-          (println value "recebido")
-          (>!! out [address {:ip (.getHostString address) :port (.getPort address)}])))
+      (loop [addresses #{}]
+        (when-let [[address _] (<!! in)]
+          (>!! out [address addresses])
+          (println "recebido" address)
+          (recur (conj addresses {:ip (.getHostString address)
+                                  :port (.getPort address)})))))
     out))
+
 
 (defn start-client! [host-name]
   (let [in (chan)
         out (chan)
-        socket-address (InetSocketAddress. ^String host-name 2048)]
+        server-address (InetSocketAddress. ^String host-name 2049)]
     (minx.udp/open! in out)
     (thread
-      (while-let [message (<!! in)]
-         (println message "recebido")))
-    (>!! out [socket-address {:ip "123.123" :port 222}])
-    (Thread/sleep 4000)))
+      (while-let [[address value] (<!! in)]
+        (println "recebido" address)
+        (doseq [peer value]
+          (>!! out [peer #{}]))))
+    (thread
+      (while (>!! out [server-address nil])
+        (Thread/sleep 4000)))
+    out))
 
 
 (comment
   (def srv (start-server!))
   (clojure.core.async/close! srv)
-  (minx.main/start-client! "127.0.0.1"))
+  (def client (minx.main/start-client! "127.0.0.1")))
+
