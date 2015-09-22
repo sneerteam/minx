@@ -1,0 +1,31 @@
+hole punching - usar 2 portas para identificar se o router sempre sai pela mesma porta
+
+('comando', 'args'...)
+('retorno', )
+
+Mercadorias:
+Armazenamento - 1KB por 1 segundo = $1
+Envio de pacotes
+Serviços (meu ip/que horas são?)
+CPU
+Consultas/searches
+
+Endereçamento: - chaves ecdsa
+Usuário - 'ASD345GF'
+Device  - 'ASD345GF-ZZ1'
+
+Camadas:
+CONEXAO - com garantia de entrega (sem perdas)
+VOZ/VIDEO - sem garantia de entrega, garantia de origem/autenticidade, ordenação
+ENDERECAMENTO - por chave
+UDP - sem garantias (entrega, alteração) / endereçamento por ip
+
+Simulador de comunidade:
+  Entra peer novo
+  Sai peer para sempre
+  Entrega de pacote pela rede (normal/atrasado(delay) - comprometido/errado)
+  Simulação de NAT (roteador pentelho (sai cada vez por uma porta))
+  Peer:
+    Enviar pacote aleatório para outro peer
+    Enviar pacote aleatório com garantia de entrega
+    Enviar pacote aleatório grande para outro peer com garantia de entrega
