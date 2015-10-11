@@ -1,7 +1,6 @@
 (ns minx.main
   (:require
-    [minx.udp :refer [while-let]]
-    [clojure.core.async :refer [thread chan >!! <!!]])
+    #_[clojure.core.async :refer [thread chan >!! <!!]])
   (:import (java.net InetSocketAddress)))
 
 ; ctrl+0: slurp right
